@@ -1,8 +1,8 @@
 """
 main.py: druhý projekt do Engeto Online Python Akademie
 
-author: Petr Svetr
-email: petr.svetr@gmail.com
+author: Radek Marval
+email: marvalradek@seznam.cz
 """
 
 import random
