@@ -100,6 +100,6 @@ def main():
         else:
             print_result(bulls, cows)             
 
-# Spuštění hry
+#spuštění hry
 if __name__ == "__main__":
     main()
