@@ -7,99 +7,131 @@ email: marvalradek@seznam.cz
 
 import random
 import time
+from typing import List, Tuple
 
-def welcome():
+
+separator = "-----------------------------------------------"
+
+
+def welcome() -> None:
+    """
+    Print a welcome message and rules for the Bulls and Cows game.
+    """
     print("Hi there!")
-    print("-----------------------------------------------")
+    print(separator)
     print("I've generated a random 4 digit number for you.")
     print("Let's play a bulls and cows game.")
-    print("-----------------------------------------------")
+    print(separator)
 
-#funkce vygeneruje náhodné 4ciferné číslo s unikátními číslicemi
-def generate_unique_4digit_number():
+
+
+def generate_unique_4digit_number() -> List[int]:
+    """
+    Generate a random 4-digit number with unique digits.
+
+    Returns:
+        List[int]: A list of 4 unique integers representing the digits.
+    """
     while True:
-        number = random.randint(1000, 9999)     #náhodné číslo od 1000 do 9999
-        digits = str(number)                    #převedeme na string, abychom ověřili číslice
-        if len(set(digits)) == 4:               #podmínka: všechny číslice musí být unikátní
-            return [int(d) for d in digits]     #vrátí list, např. 1234 → [1, 2, 3, 4]
+        number: int = random.randint(1000, 9999)
+        digits: str = str(number)
+        if len(set(digits)) == 4:
+            return [int(d) for d in digits]
 
-#kontrola, jestli hráč zadal validní vstup
-def is_valid_input(user_input):
-    if not user_input.isdigit():                #vstup musí být číslo
+
+
+def is_valid_input(user_input: str) -> bool:
+    """
+    Validate the user's input for the Bulls and Cows game.
+    """
+    if not user_input.isdigit():
         print("Please use only digits.")
         return False
-    if len(user_input) != 4:                    #musí mít 4 číslice
+    if len(user_input) != 4:
         print("Please enter exactly 4 digits.")
         return False
-    if user_input[0] == "0":                    #nesmí začínat nulou
+    if user_input[0] == "0":
         print("Number must not start with 0.")
         return False
-    if len(set(user_input)) != 4:               #číslice musí být unikátní
+    if len(set(user_input)) != 4:
         print("Digits must be unique.")
         return False
-    return True                                 #pokud vše splní → OK
+    return True
 
-#výpočet počtu bulls (správná číslice na správném místě)
-# a cows (správná číslice, ale na špatném místě)
-def bulls_and_cows(secret, guess):
-    bulls = 0
-    cows = 0
-    secret_copy = secret[:]                     #kopie seznamu, aby se s ním mohlo manipulovat
-    guess_copy = guess[:]
 
-    #nejprve hledáme bulls (přesná shoda číslice a pozice)
-    for i in range(4):
-        if guess[i] == secret[i]:
-            bulls += 1
-            secret_copy[i] = None               #odstraníme z kopie, abychom ho nepočítali dvakrát
-            guess_copy[i] = None
 
-    #potom hledáme cows (číslice existuje, ale na jiné pozici)
-    for i in range(4):
-        if guess_copy[i] is not None and guess_copy[i] in secret_copy:
-            cows += 1
-            secret_copy[secret_copy.index(guess_copy[i])] = None  # "spotřebujeme" číslici
+def bulls_and_cows(secret: List[int], guess: List[int]) -> Tuple[int, int]:
+    """
+    Compare the secret number with the user's guess and calculate
+    the number of bulls and cows.
+
+    Args:
+        secret (List[int]): The secret 4-digit number as a list of digits.
+        guess (List[int]): The guessed 4-digit number as a list of digits.
+
+    Returns:
+        Tuple[int, int]: (bulls, cows)
+    """
+
+    # "bull" = správná číslice na správné pozici
+    # zip spojí dvojice číslic ze secret a guess → [(s1, g1), (s2, g2), ...]
+    # pak jednoduše sečteme, kolikrát jsou stejné
+    bulls = sum(s == g for s, g in zip(secret, guess))
+
+    # "cow" = číslice existuje v obou číslech, ale není na správné pozici
+    # vezmeme všechny unikátní číslice z guess (set(guess))
+    # pro každou spočítáme, kolikrát se vyskytuje v obou číslech
+    # → to nám dá i bulls + cows
+    # na konci odečteme bulls, aby zůstaly jenom cows
+    cows = sum(min(secret.count(d), guess.count(d)) for d in set(guess)) - bulls
 
     return bulls, cows
 
-#funkce pro vypsání výsledku pokusu
-def print_result(bulls, cows):
-    bull_word = "bull" if bulls == 1 else "bulls"   #správná gramatika
-    cow_word = "cow" if cows == 1 else "cows"
+
+
+def print_result(bulls: int, cows: int) -> None:
+    """
+    Print the result of the current guess in a human-readable format.
+    """
+    bull_word: str = "bull" if bulls == 1 else "bulls"
+    cow_word: str = "cow" if cows == 1 else "cows"
     print(f"{bulls} {bull_word}, {cows} {cow_word}")
-    print("-----------------------------------------------")
+    print(separator)
 
-#hlavní logika hry
-def main():
-    welcome()                                      
-    secret_number = generate_unique_4digit_number()
-    attempts = 0
-    start_time = time.time()      #start časomíry
 
-    #herní smyčka
+
+def main() -> None:
+    """
+    Main function to run the Bulls and Cows game.
+    """
+    welcome()
+    secret_number: List[int] = generate_unique_4digit_number()
+    attempts: int = 0
+    start_time: float = time.time()
+
     while True:
-        #hráč zadá tip
-        user_input = input("Enter a number:\n-----------------------------------------------\n").strip()
-        
-        #kontrola vstupu
+        user_input: str = input(
+            "Enter a number:\n-----------------------------------------------\n"
+        ).strip()
+
         if not is_valid_input(user_input):
             continue
 
-        guess = [int(d) for d in user_input]        #převod vstupu na list čísel
+        guess: List[int] = [int(d) for d in user_input]
         attempts += 1
         bulls, cows = bulls_and_cows(secret_number, guess)
 
-        #pokud hráč uhodl všechny číslice správně
         if bulls == 4:
-            elapsed_time = time.time() - start_time
+            elapsed_time: float = time.time() - start_time
             print("Correct, you've guessed the right number")
             print(f"in {attempts} guesses!")
-            print(f"That's amazing!")
+            print("That's amazing!")
             print(f"It took you {elapsed_time:.2f} seconds.")
-            break                                   
+            break
         else:
-            print_result(bulls, cows)             
+            print_result(bulls, cows)
 
-#spuštění hry
+
+
 if __name__ == "__main__":
     main()
