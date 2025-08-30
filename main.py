@@ -110,9 +110,7 @@ def main() -> None:
     start_time: float = time.time()
 
     while True:
-        user_input: str = input(
-            "Enter a number:\n-----------------------------------------------\n"
-        ).strip()
+        user_input: str = input(f"Enter a number:\n{separator}\n").strip()
 
         if not is_valid_input(user_input):
             continue
